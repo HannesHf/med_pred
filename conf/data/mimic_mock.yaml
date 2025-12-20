@@ -1,0 +1,6 @@
+# conf/data/mimic_mock.yaml
+dataset_name: "mimic_mock"
+seq_len: 50
+input_dim: 20
+batch_size: 16
+num_workers: 0

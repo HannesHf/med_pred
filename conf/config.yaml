@@ -1,0 +1,9 @@
+# conf/config.yaml
+defaults:
+  - _self_
+  - model: lstm
+  - data: mimic_mock
+  - training: default_train
+
+experiment_name: "Modular_Experiment"
+seed: 42
