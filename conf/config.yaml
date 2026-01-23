@@ -1,5 +1,8 @@
 seed: 42
-experiment_name: "mimic_lstm_gpu_run"
+experiment_name: "med_pred_experiment"
+
+mlflow:
+  storage_dir: "../ML_DATA"
 
 data:
   seq_len: 50
