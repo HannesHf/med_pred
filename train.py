@@ -23,7 +23,16 @@ def main(cfg: DictConfig):
     # Für MLflow lokal müssen wir sicherstellen, dass wir den Pfad kennen.
     # Wir nutzen hier den absoluten Pfad zum ursprünglichen Ordner.
     orig_cwd = hydra.utils.get_original_cwd()
-    mlruns_path = os.path.join(orig_cwd, "mlruns")
+    
+    ml_data_path = (pathlib.Path(orig_cwd) / cfg.mlflow.storage_dir).resolve()
+    ml_data_path.mkdir(parents=True, exist_ok=True)
+
+    artifact_path = ml_data_path / "artifacts"
+    artifact_path.mkdir(parents=True, exist_ok=True)
+
+    # SQLite Datenbank Pfad und Artifact Location
+    db_url = f"sqlite:///{(ml_data_path / 'mlflow.db').as_posix()}"
+    artifact_url = artifact_path.as_uri()
 
     # Module initialisieren (wir übergeben die gesamte cfg)
     dm = MimicDataModule(cfg)
@@ -31,9 +40,13 @@ def main(cfg: DictConfig):
 
     mlf_logger = MLFlowLogger(
         experiment_name=cfg.experiment_name,
-        tracking_uri=pathlib.Path(mlruns_path).as_uri()
+        tracking_uri=db_url,
+        artifact_location=artifact_url
     )
     
+    # Info-Ausgabe: Zeigt dir direkt, wie du das UI startest
+    print(f"\n🚀 MLflow UI starten mit: mlflow ui --backend-store-uri {db_url}\n")
+
     # MLflow Parameter loggen (Flattened Dict für Übersichtlichkeit)
     mlf_logger.log_hyperparams(OmegaConf.to_container(cfg, resolve=True))
 
