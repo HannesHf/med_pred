@@ -1,5 +1,7 @@
 .venv
-outputs/
+outputs/*
+!outputs/.gitkeep
 .aiexclude
-checkpoints/
+checkpoints/*
+!checkpoints/.gitkeep
 __pycache__/
