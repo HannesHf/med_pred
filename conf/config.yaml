@@ -1,9 +1,19 @@
-# conf/config.yaml
-defaults:
-  - _self_
-  - model: lstm
-  - data: mimic_mock
-  - training: default_train
-
-experiment_name: "Modular_Experiment"
 seed: 42
+experiment_name: "mimic_lstm_gpu_run"
+
+data:
+  seq_len: 50
+  input_dim: 20
+  batch_size: 64
+  num_samples: 10000
+
+model:
+  hidden_dim: 128
+  num_layers: 2
+  dropout: 0.1
+  num_classes: 2
+  lr: 0.001
+
+training:
+  max_epochs: 10
+  patience: 3
