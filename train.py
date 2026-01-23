@@ -4,6 +4,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 import hydra
 from omegaconf import DictConfig, OmegaConf
 import os
+import pathlib
 
 # Imports bleiben gleich
 from src.data.mimic_loader import MimicDataModule
@@ -30,7 +31,7 @@ def main(cfg: DictConfig):
 
     mlf_logger = MLFlowLogger(
         experiment_name=cfg.experiment_name,
-        tracking_uri=f"file:{mlruns_path}"
+        tracking_uri=pathlib.Path(mlruns_path).as_uri()
     )
     
     # MLflow Parameter loggen (Flattened Dict für Übersichtlichkeit)
