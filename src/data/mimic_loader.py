@@ -8,16 +8,16 @@ import pytorch_lightning as pl
 
 class MimicTokenDataset(Dataset):
     def __init__(self, df, max_len=None):
-        self.df = df
+        self.tokens = df['token_ids'].tolist()
+        self.labels = df['label'].tolist()
         self.max_len = max_len 
 
     def __len__(self):
-        return len(self.df)
+        return len(self.tokens)
 
     def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        tokens = row['token_ids'] 
-        label = row['label']
+        tokens = self.tokens[idx]
+        label = self.labels[idx]
         
         if self.max_len and len(tokens) > self.max_len:
             tokens = tokens[:self.max_len]
@@ -75,7 +75,9 @@ class MimicDataModule(pl.LightningDataModule):
             batch_size=self.cfg.data.batch_size,
             shuffle=True, 
             collate_fn=collate_fn,
-            num_workers=0 
+            num_workers=4,
+            persistent_workers=True,
+            pin_memory=True
         )
 
     def val_dataloader(self):
@@ -84,5 +86,7 @@ class MimicDataModule(pl.LightningDataModule):
             batch_size=self.cfg.data.batch_size,
             shuffle=False, 
             collate_fn=collate_fn,
-            num_workers=0
+            num_workers=4,
+            persistent_workers=True,
+            pin_memory=True
         )
