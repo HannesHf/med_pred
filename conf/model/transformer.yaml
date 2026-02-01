@@ -1,0 +1,13 @@
+# conf/model/transformer.yaml
+name: "transformer_encoder"
+
+d_model: 64
+nhead: 4
+num_layers: 2
+dim_feedforward: 128
+dropout: 0.1
+
+num_classes: 2
+lr: 0.0005
+
+input_dim: 0
