@@ -1,53 +1,29 @@
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
-from omegaconf import DictConfig
+from src.models.base_module import BaseDiseasePredictor
 
-class DiseasePredictor(pl.LightningModule):
-    def __init__(self, cfg: DictConfig):
-        super().__init__()
-        self.save_hyperparameters(cfg) # Loggt alles sauber
-        self.cfg = cfg
+class DiseasePredictor(BaseDiseasePredictor):
+    def __init__(self, cfg):
+        super().__init__(cfg)
         
-        self.lstm = nn.LSTM(
-            input_size=cfg.data.input_dim,     # Beachte die Punkt-Notation!
+        self.embedding = nn.Embedding(cfg.model.input_dim, cfg.model.hidden_dim, padding_idx=0)
+        
+        self.rnn = nn.LSTM(
+            input_size=cfg.model.hidden_dim,
             hidden_size=cfg.model.hidden_dim,
             num_layers=cfg.model.num_layers,
             batch_first=True,
-            dropout=cfg.model.dropout
+            dropout=cfg.model.dropout if cfg.model.num_layers > 1 else 0
         )
         
-        self.classifier = nn.Linear(cfg.model.hidden_dim, cfg.model.num_classes)
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.fc = nn.Linear(cfg.model.hidden_dim, cfg.model.num_classes)
 
     def forward(self, x):
-        # x: (batch, seq_len, features)
-        lstm_out, _ = self.lstm(x)
+        embedded = self.embedding(x)
         
-        # Nimm den letzten Zeitschritt (Many-to-One)
-        last_time_step = lstm_out[:, -1, :]
-        logits = self.classifier(last_time_step)
+        output, (hidden, cell) = self.rnn(embedded)
+        
+        last_hidden = hidden[-1]
+        
+        logits = self.fc(last_hidden)
         return logits
-
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        logits = self.forward(x)
-        loss = self.loss_fn(logits, y)
-        
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        logits = self.forward(x)
-        loss = self.loss_fn(logits, y)
-        
-        preds = torch.argmax(logits, dim=1)
-        acc = (preds == y).float().mean()
-        
-        self.log("val_loss", loss, prog_bar=True)
-        self.log("val_acc", acc, prog_bar=True)
-        return loss
-
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.cfg.model.lr)

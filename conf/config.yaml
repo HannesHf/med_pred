@@ -1,26 +1,59 @@
 defaults:
   - _self_
-  - model: lstm
+  - override hydra/sweeper: optuna
 
 seed: 42
-experiment_name: "med_pred_experiment"
+experiment_name: "MIMIC_Mortality_Prediction"
 
+logger:
+  mlflow:
+    experiment_name: "MIMIC_Mortality_Prediction"
+    run_name: "Champion_Run"
+    
 mlflow:
   storage_dir: "../ML_DATA"
 
 data:
-  seq_len: 50
-  input_dim: 20
-  batch_size: 64
+  seq_len: 1024
+  input_dim: 20924
+  batch_size: 512
   num_samples: 10000
 
 model:
-  hidden_dim: 128
+  name: "transformer_encoder"
+  input_dim: 20924
+  d_model: 64
+  nhead: 4
   num_layers: 2
-  dropout: 0.1
+  dim_feedforward: 256
+  dropout: 0.10710050387755388
+  lr: 0.0006039122933759172
   num_classes: 2
-  lr: 0.001
+  pooling: "max"
 
 training:
   max_epochs: 10
   patience: 3
+
+hydra:
+  sweeper:
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 123
+      consider_prior: true
+      prior_weight: 1.0
+      multivariate: true
+
+    _target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+    direction: maximize
+    study_name: pooling_optimization_auprc
+    storage: sqlite:///optuna_study.db
+    n_trials: 20
+    n_jobs: 1
+
+    params:
+      model.lr: tag(log, interval(1e-5, 1e-2))
+      model.dropout: interval(0.1, 0.5)
+      model.d_model: choice(64, 128)
+      
+      model.pooling: choice("mean", "max")
