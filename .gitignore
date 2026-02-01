@@ -5,3 +5,4 @@ outputs/*
 checkpoints/*
 !checkpoints/.gitkeep
 __pycache__/
+*.png
