@@ -58,3 +58,15 @@ macht dieser Ansatz Sinn? Was sind objektive Stärken und Schwächen?
 -> 60%  0.6958
 -> 80%  0.7007
 -> 100%  0.7211
+kein größerer Unterschied -> Cases mit Schwankungen ansehen.
+
+-> streamlit app -> im eyeballing sind einzelne verläufe recht klar mit ansteigendem und sinkendem risiko und differenzieren das risiko. die abbildung der testergebnisse scheint aber nicht so gut zu sein -> viele tests in Folge sind abnormal -> ausdifferenzieren -> feinere skala oder komplett anders encoden
+Beispiel: 
+🧪 Labor: 51266_abnormal
+🧪 Labor: 51265_abnormal
+-> Inhalt Token + Value Token
+
+es waren nur tests mit abnormalen ergebnisse enthalten
+
+
+am anfang steht nicht die aufnahme -> korrekt?

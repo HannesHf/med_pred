@@ -49,7 +49,7 @@ class MimicDataModule(pl.LightningDataModule):
             raise FileNotFoundError(f"❌ Datei fehlt: {self.data_path}")
 
         print(f"📥 Lade Parquet: {self.data_path}")
-        full_df = pd.read_parquet(self.data_path, columns=['subject_id', 'token_ids', 'label'])
+        full_df = pd.read_parquet(self.data_path, columns=['subject_id', 'token_ids', 'label', 'chunk_id'])
         
         # Patient-Level Split
         all_subjects = full_df['subject_id'].unique()

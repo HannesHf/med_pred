@@ -66,7 +66,7 @@ def run_pipeline():
         CREATE OR REPLACE TABLE all_events_base AS
         SELECT subject_id, admittime as t, 0 as priority, 'ADM_START' as token FROM raw_admissions
         UNION ALL
-        SELECT subject_id, charttime as t, 1 as priority, 'LAB_' || itemid || '_' || flag as token FROM raw_labs WHERE flag = 'abnormal'
+        SELECT subject_id, charttime as t, 1 as priority, 'LAB_' || itemid || '_' || COALESCE(flag, 'normal') as token FROM raw_labs
         UNION ALL
         SELECT subject_id, starttime as t, 1 as priority, 'MED_' || drug as token FROM raw_meds WHERE drug IS NOT NULL
         UNION ALL
@@ -168,7 +168,7 @@ def run_pipeline():
                 s.priority, 
                 s.sub_priority,
                 COALESCE(v.id, 1) as token_id,
-                ROW_NUMBER() OVER (PARTITION BY s.subject_id ORDER BY s.t ASC, s.priority ASC) as rn
+                ROW_NUMBER() OVER (PARTITION BY s.subject_id ORDER BY s.t ASC, s.priority ASC, s.sub_priority ASC) as rn
             FROM final_stream s
             LEFT JOIN vocab_map v ON s.token = v.token
         )
