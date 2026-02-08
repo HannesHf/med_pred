@@ -1,6 +1,8 @@
 # Medical Prediction Project
 
-Moin! Hier ist eine kurze Übersicht, wie du das Projekt zum Laufen bekommst. Wir analysieren hier Patientendaten, um Risiken (wie Mortalität) vorherzusagen.
+Eine kurze Übersicht, wie du das Projekt zum Laufen bekommst. Wir analysieren hier Patientendaten, um Risiken (wie Mortalität) vorherzusagen.
+
+https://github.com/user-attachments/assets/5c5f9f5e-4d80-4f9e-a78b-9e99ffc934b5
 
 ## Quick Start (Docker)
 
