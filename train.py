@@ -5,35 +5,34 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 import os
 
-# Imports bleiben gleich
 from src.data.mimic_loader import MimicDataModule
-from src.models.rnn_module import DiseasePredictor
+from src.models.rnn_module import DiseasePredictor as RNNPredictor
+from src.models.transformer_module import DiseasePredictor as TransformerPredictor
 
-# Der Hydra Decorator injiziert die YAML-Config als 'cfg'
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    
-    # Optional: Config im Terminal ausgeben zur Kontrolle
     print(OmegaConf.to_yaml(cfg))
 
     pl.seed_everything(cfg.seed)
 
-    # WICHTIG: Hydra ändert das Working Directory. 
-    # Für MLflow lokal müssen wir sicherstellen, dass wir den Pfad kennen.
-    # Wir nutzen hier den absoluten Pfad zum ursprünglichen Ordner.
     orig_cwd = hydra.utils.get_original_cwd()
     mlruns_path = os.path.join(orig_cwd, "mlruns")
 
-    # Module initialisieren (wir übergeben die gesamte cfg)
     dm = MimicDataModule(cfg)
-    model = DiseasePredictor(cfg)
+
+    model_name = getattr(cfg.model, 'name', 'lstm_baseline')
+    if model_name == "transformer_encoder":
+        print("🤖 Lade Transformer Modell...")
+        model = TransformerPredictor(cfg)
+    else:
+        print("🔄 Lade LSTM Modell...")
+        model = RNNPredictor(cfg)
 
     mlf_logger = MLFlowLogger(
         experiment_name=cfg.experiment_name,
         tracking_uri=f"file:{mlruns_path}"
     )
     
-    # MLflow Parameter loggen (Flattened Dict für Übersichtlichkeit)
     mlf_logger.log_hyperparams(OmegaConf.to_container(cfg, resolve=True))
 
     checkpoint_callback = ModelCheckpoint(
@@ -62,4 +61,4 @@ def main(cfg: DictConfig):
     trainer.fit(model, datamodule=dm)
 
 if __name__ == "__main__":
-    main()
+    main()
